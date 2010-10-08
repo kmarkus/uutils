@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.1
+VERSION=0.2
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -62,6 +62,11 @@ function tab2str( tbl )
       end
    end
    return "{" .. table.concat( result, "," ) .. "}"
+end
+
+function pp(val)
+   if type(val) == 'table' then print(tab2str(val)) 
+   else print(val) end
 end
 
 function lpad(str, len, char)
