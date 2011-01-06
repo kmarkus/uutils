@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.2
+VERSION=0.3
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -123,6 +123,7 @@ function car(tab)
 end
 
 function cdr(tab)
+   local new_array = {}
    for i = 2, table.getn(tab) do
       table.insert(new_array, tab[i])
    end
