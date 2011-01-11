@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.3
+VERSION=0.4
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -243,4 +243,11 @@ function table_cmp(t1, t2)
       end
    end
    return __cmp(t1,t2) and __cmp(t2,t1)
+end
+
+function table_has(t, x)
+   for _,e in ipairs(t) do
+      if e==x then return true end
+   end
+   return false
 end
