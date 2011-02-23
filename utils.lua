@@ -19,7 +19,7 @@ function append(car, ...)
    for i,v in pairs(car) do
       table.insert(new_array, v)
    end
-   for _, tab in ipairs(arg) do
+   for _, tab in ipairs({...}) do
       for k,v in pairs(tab) do
 	 table.insert(new_array, v)
       end
@@ -80,12 +80,12 @@ function rpad(str, len, char)
 end
 
 function stderr(...)
-   io.stderr:write(unpack(arg))
+   io.stderr:write(...)
    io.stderr:write("\n")
 end
 
 function stdout(...)
-   print(unpack(arg))
+   print(...)
 end
 
 function split(str, pat)
@@ -210,7 +210,8 @@ function AND(a, b) return a and b end
 -- and which takes table
 function andt(...)
    local res = true
-   for _,t in ipairs(arg) do
+   local tab = {...}
+   for _,t in ipairs(tab) do
       res = res and foldr(AND, true, t)
    end
    return res
