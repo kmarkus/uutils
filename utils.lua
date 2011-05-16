@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.4
+VERSION=0.5
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -251,4 +251,25 @@ function table_has(t, x)
       if e==x then return true end
    end
    return false
+end
+
+--- Convert arguments list into key-value pairs.
+-- The return table is indexable by parameters (i.e. ["-p"]) and the
+-- value is an array of zero to many option parameters.
+-- @param standard Lua argument table
+-- @return key-value table
+function proc_args(args)
+   local function is_opt(s) return string.sub(s, 1, 1) == '-' end
+   local res = { [0]={} }
+   local last_key = 0
+   for i=1,#args do
+      if is_opt(args[i]) then -- new key
+	 last_key = args[i]
+	 res[last_key] = {}
+      else -- option parameter, append to existing tab
+	 local list = res[last_key]
+	 list[#list+1] = args[i]
+      end
+   end
+   return res
 end
