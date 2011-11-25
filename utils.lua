@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.9
+VERSION=0.91
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -339,4 +339,13 @@ function advise(where, oldfun, newfun)
    else
       return function (...) oldfun(...); newfun(...); end
    end
+end
+
+--- Check wether a file exists.
+-- @param fn filename to check.
+-- @return true or false
+function file_exists(fn)
+   local f=io.open(fn);
+   if f then io.close(f); return true end
+   return false
 end
