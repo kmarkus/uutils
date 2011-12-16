@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.91
+VERSION=0.92
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -203,6 +203,16 @@ function deepcopy(object)
       return setmetatable(new_table, getmetatable(object))
    end
    return _copy(object)
+end
+
+function imap(f, tab)
+   local newtab = {}
+   if tab == nil then return newtab end
+   for i,v in ipairs(tab) do
+      local res = f(v,i)
+      newtab[#newtab+1] = res
+   end
+   return newtab
 end
 
 function map(f, tab)
