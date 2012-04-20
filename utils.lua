@@ -149,7 +149,7 @@ function basename(n)
    if not string.find(n, '[\\.]') then
       return n
    else
-      local t = utils.split(n, "[\\.]")
+      local t = split(n, "[\\.]")
       return t[#t]
    end
 end
