@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.94
+VERSION=0.95
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -388,4 +388,14 @@ function gen_do_every(s, ns, thunk, gettime)
 		next.sec, next.nsec = time.add(cur, inc)
 	     end
 	  end
+end
+
+function expand(tpl, params)
+   return string.gsub(tpl, "%$(%a+)",
+		      function(w)
+			 if not params[w] then
+			    error("expand: no param for variable " .. w)
+			 end
+			 return params[w]
+		      end)
 end
