@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.93
+VERSION=0.94
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -371,5 +371,21 @@ function memoize (f)
 		mem[x] = r 	-- store result for reuse
 	     end
 	     return r
+	  end
+end
+
+--- call thunk every s+ns seconds.
+function gen_do_every(s, ns, thunk, gettime)
+   local next = { sec=0, nsec=0 }
+   local cur = { sec=0, nsec=0 }
+   local inc = { sec=s, nsec=ns }
+
+   return function()
+	     cur.sec, cur.nsec = gettime()
+
+	     if time.cmp(cur, next) == 1 then
+		thunk()
+		next.sec, next.nsec = time.add(cur, inc)
+	     end
 	  end
 end
