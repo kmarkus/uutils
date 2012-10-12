@@ -10,7 +10,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.991
+VERSION=0.992
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -271,6 +271,25 @@ function foldr(func, val, tab)
       val = func(val, v)
    end
    return val
+end
+
+--- Pre-order tree traversal.
+-- @param fun function to apply to each node
+-- @param root root to start from
+-- @param pred predicate that nodes must be satisfied for function application.
+-- @return table of return values
+function maptree(fun, root, pred)
+   local res = {}
+   local function __maptree(tab)
+      foreach(function(v, k)
+		 if not pred or pred(v) then
+		    res[#res+1] = fun(v, tab, k)
+		 end
+		 if type(v) == 'table' then __maptree(v) end
+	      end, tab)
+   end
+   __maptree(root)
+   return res
 end
 
 -- O' Scheme, where art thou?
