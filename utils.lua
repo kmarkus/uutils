@@ -12,7 +12,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.993
+VERSION=0.994
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -310,6 +310,11 @@ end
 
 function eval(str)
    return assert(loadstring(str))()
+end
+
+function unrequire(m)
+   package.loaded[m] = nil
+   _G[m] = nil
 end
 
 -- Compare two values (potentially recursively).
