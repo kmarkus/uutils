@@ -12,7 +12,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.994
+VERSION=0.995
 
 function append(car, ...)
    assert(type(car) == 'table')
