@@ -492,7 +492,7 @@ function preproc(str, env)
 
    for _,line in ipairs(lines) do
       line = trim(line)
-      if string.find(line, "^#") then
+      if string.find(line, "^@") then
 	 chunk[#chunk+1] = string.sub(line, 2) .. "\n"
       else
 	 local last = 1
