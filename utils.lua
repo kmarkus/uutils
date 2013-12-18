@@ -12,7 +12,7 @@ module('utils')
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.995
+VERSION=0.996
 
 function append(car, ...)
    assert(type(car) == 'table')
@@ -532,8 +532,9 @@ end
 -- @param space space between values (default: "")
 -- @return hex string
 function str_to_hexstr(str,spacer)
-   return (string.gsub(str,"(.)",
-		       function (c)
-			  return string.format("%02X%s",string.byte(c), spacer or "")
-		       end ) )
+   return string.lower(
+      (string.gsub(str,"(.)",
+		   function (c)
+		      return string.format("%02X%s",string.byte(c), spacer or "")
+		   end ) ) )
 end
