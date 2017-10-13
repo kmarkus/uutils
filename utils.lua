@@ -7,7 +7,7 @@ M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-VERSION=0.998
+M.VERSION="1.0.0"
 
 function M.append(car, ...)
    assert(type(car) == 'table')
