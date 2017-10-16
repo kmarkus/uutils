@@ -13,8 +13,9 @@ install:
 	@install  lua/*.lua ${luamod_prefix}/5.3/
 
 uninstall:
-	@rm -f ${luamod_prefix}/5.1/utils.lua ${luamod_prefix}/5.1/strict.lua ${luamod_prefix}/5.1/time.lua
-	@rm -f ${luamod_prefix}/5.2/utils.lua ${luamod_prefix}/5.2/strict.lua ${luamod_prefix}/5.2/time.lua
-	@rm -f ${luamod_prefix}/5.3/utils.lua ${luamod_prefix}/5.3/strict.lua ${luamod_prefix}/5.3/time.lua
+	@rm -f ${luamod_prefix}/*/utils.lua
+	@rm -f ${luamod_prefix}/*/time.lua
+	@rm -f ${luamod_prefix}/*/strict.lua
+	@rm -f ${luamod_prefix}/*/ansicolors.lua
 
 PHONY: install
