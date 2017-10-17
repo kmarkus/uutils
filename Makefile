@@ -9,11 +9,20 @@ clean:
 
 install:
 	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.1/
-	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.2/
-	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.3/
 	@install -m 644 lua/*.lua ${DESTDIR}/${luamod_prefix}/5.1/
-	@install -m 644 lua/*.lua ${DESTDIR}/${luamod_prefix}/5.2/
-	@install -m 644 lua/*.lua ${DESTDIR}/${luamod_prefix}/5.3/
+
+	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.2/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/strict.lua ${DESTDIR}/${luamod_prefix}/5.2/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/ansicolors.lua ${DESTDIR}/${luamod_prefix}/5.2/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/utils.lua ${DESTDIR}/${luamod_prefix}/5.2/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/time.lua ${DESTDIR}/${luamod_prefix}/5.2/
+
+	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.3/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/strict.lua ${DESTDIR}/${luamod_prefix}/5.3/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/ansicolors.lua ${DESTDIR}/${luamod_prefix}/5.3/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/utils.lua ${DESTDIR}/${luamod_prefix}/5.3/
+	@ln -sr ${DESTDIR}/${luamod_prefix}/5.1/time.lua ${DESTDIR}/${luamod_prefix}/5.3/
+
 
 uninstall:
 	@rm -f ${DESTDIR}/${luamod_prefix}/*/utils.lua
