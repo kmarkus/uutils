@@ -8,9 +8,12 @@ clean:
 	rm -f *~
 
 install:
-	@install  lua/*.lua ${DESTDIR}/${luamod_prefix}/5.1/
-	@install  lua/*.lua ${DESTDIR}/${luamod_prefix}/5.2/
-	@install  lua/*.lua ${DESTDIR}/${luamod_prefix}/5.3/
+	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.1/
+	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.2/
+	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.3/
+	@install -m 644 lua/*.lua ${DESTDIR}/${luamod_prefix}/5.1/
+	@install -m 644 lua/*.lua ${DESTDIR}/${luamod_prefix}/5.2/
+	@install -m 644 lua/*.lua ${DESTDIR}/${luamod_prefix}/5.3/
 
 uninstall:
 	@rm -f ${DESTDIR}/${luamod_prefix}/*/utils.lua
