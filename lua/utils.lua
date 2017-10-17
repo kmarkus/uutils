@@ -1,6 +1,7 @@
 --
 -- Useful code snips
 -- some own ones, some collected from the lua wiki
+-- License: MIT
 --
 
 M = {}
