@@ -181,7 +181,7 @@ end
 
 function M.cdr(tab)
    local new_array = {}
-   for i = 2, table.getn(tab) do
+   for i = 2, #tab do
       table.insert(new_array, tab[i])
    end
    return new_array
