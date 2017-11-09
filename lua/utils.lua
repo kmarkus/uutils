@@ -278,7 +278,7 @@ end
 function M.maptree(fun, root, pred)
    local res = {}
    local function __maptree(tab)
-      foreach(function(v, k)
+      M.foreach(function(v, k)
 		 if not pred or pred(v) then
 		    res[#res+1] = fun(v, tab, k)
 		 end
@@ -351,7 +351,7 @@ end
 function M.table_unique(t)
    local res = {}
    for i,v in ipairs(t) do
-      if not table_has(res, v) then res[#res+1]=v end
+      if not M.table_has(res, v) then res[#res+1]=v end
    end
    return res
 end
