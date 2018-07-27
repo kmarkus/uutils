@@ -323,7 +323,8 @@ function M.andt(...)
 end
 
 function M.eval(str)
-   return assert(loadstring(str))()
+   local l = load or loadstring -- 5.1 backward compat
+   return assert(l(str))()
 end
 
 function M.unrequire(m)
