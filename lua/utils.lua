@@ -23,7 +23,7 @@
 -- OTHER DEALINGS IN THE SOFTWARE.
 --
 
-M = {}
+local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
@@ -514,6 +514,8 @@ function M.preproc(str, env, verbose)
    local chunk = {"__res={}\n" }
    local lines = M.split(str, "\n")
 
+   env["__concat__"] = table.concat
+
    for _,line in ipairs(lines) do
       -- line = trim(line)
       local s,e = string.find(line, "^%s*@")
@@ -534,12 +536,14 @@ function M.preproc(str, env, verbose)
 	 chunk[#chunk+1] = string.format('__res[#__res+1] = %q\n', string.sub(line, last).."\n")
       end
    end
-   chunk[#chunk+1] = "return table.concat(__res, '')\n"
+   chunk[#chunk+1] = "return __concat__(__res, '')\n"
    local ret, str = M.eval_sandbox(table.concat(chunk), env)
    if not ret and verbose then
       print("preproc failed: start of error report")
       local code_dump = table.concat(chunk)
-      for i,l in ipairs(M.split(code_dump, "\n")) do print(tostring(i)..":\t"..string.format("%q", l)) end
+      for i,l in ipairs(M.split(code_dump, "\n")) do
+	 print(tostring(i)..":\t"..string.format("%q", l))
+      end
       print(str.."\npreproc failed: end of error message")
    end
    return ret, str
