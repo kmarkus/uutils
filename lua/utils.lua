@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="1.0.0"
+M.VERSION="1.0.1"
 
 function M.append(car, ...)
    assert(type(car) == 'table')
@@ -298,7 +298,7 @@ function M.maptree(fun, root, pred)
    local res = {}
    local function __maptree(tab)
       M.foreach(function(v, k)
-		 if not pred or pred(v) then
+		 if not pred or pred(v, tab, k) then
 		    res[#res+1] = fun(v, tab, k)
 		 end
 		 if type(v) == 'table' then __maptree(v) end
