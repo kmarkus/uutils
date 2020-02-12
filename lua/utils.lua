@@ -506,6 +506,8 @@ end
 -- Other lines are passed through verbatim, expect those contained in
 -- $(...) which are evaluated and the result inserted.
 --
+-- Adapted from: http://lua-users.org/wiki/SimpleLuaPreprocessor
+--
 -- @param str string to preprocess
 -- @param env environment for sandbox (default {})
 -- @param verbose print verbose error message in case of failure
