@@ -289,6 +289,16 @@ function M.foldr(func, val, tab)
    return val
 end
 
+--- Count the number of elements in a table
+-- this counts both dict and array parts
+-- @param x table
+-- @return number of values in x
+function M.num_elem(x)
+   local n = 0
+   for _,_ in pairs(x) do n = n + 1 end
+   return n
+end
+
 --- Pre-order tree traversal.
 -- @param fun function to apply to each node
 -- @param root root to start from
