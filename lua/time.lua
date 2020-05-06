@@ -35,6 +35,9 @@ M.VERSION = "1.0.0"
 local ns_per_s = 1000000000
 local us_per_s = 1000000
 
+M.ns_per_s = ns_per_s
+M.us_per_s = us_per_s
+
 --- Normalize time.
 -- @param sec seconds
 -- @param nsec nanoseconds
