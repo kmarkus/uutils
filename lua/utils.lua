@@ -289,6 +289,16 @@ function M.foldr(func, val, tab)
    return val
 end
 
+--- Fill a table with num val's
+-- @param val value
+-- @param num number
+-- @param table of num val's
+function M.fill(val, num)
+   local res = {}
+   for i=1,num do res[i] = M.deepcopy(val) end
+   return res
+end
+
 --- Count the number of elements in a table
 -- this counts both dict and array parts
 -- @param x table
