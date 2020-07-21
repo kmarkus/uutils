@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="1.0.1"
+M.VERSION="1.1.0"
 
 function M.append(car, ...)
    assert(type(car) == 'table')
@@ -139,6 +139,41 @@ end
 -- @return stripped string
 -- @return number of replacements
 function M.strip_ansi(str) return string.gsub(str, "\27%[%d+m", "") end
+
+--- write the given table in a human readable form
+-- rows (and headers) are arrays (dictionary entries are ignored)
+-- @param fd file descriptor
+-- @param hdrtab table of headers
+-- @param tab table of row tables
+function M.write_table(fd, hdrtab, tab)
+   local cntpad = #(tostring(#tab))+2
+   -- write row table values and pad with value from corresponding pad tab
+   local function clean(x) return M.strip_ansi(tostring(x)) end
+   local function write_row(i, row, colpad)
+      i = i or " "
+      i=M.rpad(tostring(i), cntpad)
+
+      local r_padded =
+	 M.imap(
+	    function(x,i)
+	       return M.rpad(tostring(x), colpad[i]+1, ' ', #clean(x))
+	    end, row)
+
+      fd:write(i .. table.concat(r_padded, " ") ..'\n')
+   end
+
+   local maxlens = M.imap(string.len, hdrtab)
+
+   for _,row in ipairs(tab) do
+      for i=1,#maxlens-1 do
+	 if #clean(row[i]) > maxlens[i] then maxlens[i] = #clean(row[i]) end
+      end
+   end
+
+   write_row(nil, hdrtab, maxlens)
+
+   for i,r in ipairs(tab) do write_row(i, r, maxlens) end
+end
 
 --- Convert string to string of fixed lenght.
 -- Will either pad with whitespace if too short or will cut of tail if
