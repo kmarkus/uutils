@@ -37,7 +37,7 @@ function M.append(car, ...)
       table.insert(new_array, v)
    end
    for _, tab in ipairs({...}) do
-      for k,v in pairs(tab) do
+      for _,v in pairs(tab) do
 	 table.insert(new_array, v)
       end
    end
@@ -255,7 +255,7 @@ function M.cons(car, cdr)
 end
 
 function M.flatten(t)
-   function __flatten(res, t)
+   local function __flatten(res, t)
       if type(t) == 'table' then
 	 for k,v in ipairs(t) do __flatten(res, v) end
       else
@@ -508,7 +508,7 @@ function M.gen_do_every(s, ns, thunk, gettime)
    local cur = { sec=0, nsec=0 }
    local inc = { sec=s, nsec=ns }
 
-   if not table(time) then
+   if not type(time) == 'table' then
       error ("gen_do_every requires the time module")
    end
    return function()
