@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="1.1.0"
+M.VERSION="1.1.1"
 
 function M.append(car, ...)
    assert(type(car) == 'table')
@@ -101,9 +101,14 @@ function M.wrap(str, limit, indent, indent1)
 			    end)
 end
 
-function M.pp(val)
-   if type(val) == 'table' then print(M.tab2str(val))
-   else print(val) end
+function M.pp(...)
+   local vals = table.pack(...)
+   local t = {}
+   for i=1,vals.n do
+      if type(vals[i]) == 'table' then t[#t+1] = M.tab2str(vals[i])
+      else t[#t+1] = tostring(vals[i]) end
+   end
+   print(table.concat(t, ', '))
 end
 
 function M.lpad(str, len, char, strlen)
