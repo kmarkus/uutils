@@ -29,6 +29,8 @@ local M = {}
 -- increment minor on non breaking changes
 M.VERSION="1.1.1"
 
+local pack = table.pack or function(...) return { n = select('#', ...), ... } end
+
 function M.append(car, ...)
    assert(type(car) == 'table')
    local new_array = {}
@@ -101,8 +103,9 @@ function M.wrap(str, limit, indent, indent1)
 			    end)
 end
 
+
 function M.pp(...)
-   local vals = table.pack(...)
+   local vals = pack(...)
    local t = {}
    for i=1,vals.n do
       if type(vals[i]) == 'table' then t[#t+1] = M.tab2str(vals[i])
