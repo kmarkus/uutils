@@ -22,6 +22,12 @@ install:
 	@ln -srf ${DESTDIR}/${luamod_prefix}/5.1/utils.lua ${DESTDIR}/${luamod_prefix}/5.3/
 	@ln -srf ${DESTDIR}/${luamod_prefix}/5.1/time.lua ${DESTDIR}/${luamod_prefix}/5.3/
 
+	@install -d -m 755 ${DESTDIR}/${luamod_prefix}/5.4/
+	@ln -srf ${DESTDIR}/${luamod_prefix}/5.1/strict.lua ${DESTDIR}/${luamod_prefix}/5.4/
+	@ln -srf ${DESTDIR}/${luamod_prefix}/5.1/ansicolors.lua ${DESTDIR}/${luamod_prefix}/5.4/
+	@ln -srf ${DESTDIR}/${luamod_prefix}/5.1/utils.lua ${DESTDIR}/${luamod_prefix}/5.4/
+	@ln -srf ${DESTDIR}/${luamod_prefix}/5.1/time.lua ${DESTDIR}/${luamod_prefix}/5.4/
+
 
 uninstall:
 	@rm -f ${DESTDIR}/${luamod_prefix}/*/utils.lua
