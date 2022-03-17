@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="1.1.1"
+M.VERSION="1.1.2"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 
@@ -181,6 +181,27 @@ function M.write_table(fd, hdrtab, tab)
    write_row(nil, hdrtab, maxlens)
 
    for i,r in ipairs(tab) do write_row(i, r, maxlens) end
+end
+
+--- Convert a array of dictionaries into header and rows
+-- the output can be directly fed to write_table
+-- @param t a table of tables
+-- @return hdr and rows tables
+function M.tabulate(t)
+   local hdr, rows = {}, {}
+
+   -- use first row to extract the hdr fields
+   for k,_ in pairs(t[1]) do hdr[#hdr+1] = k end
+   table.sort(hdr)
+
+   for _,row in ipairs(t) do
+      local newrow = {}
+      for _,h in ipairs(hdr) do
+	 newrow[#newrow+1] = row[h]
+      end
+      rows[#rows+1] = newrow
+   end
+   return hdr, rows
 end
 
 --- Convert string to string of fixed lenght.
