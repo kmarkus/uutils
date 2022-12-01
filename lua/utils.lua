@@ -153,8 +153,10 @@ function M.strip_ansi(str) return string.gsub(str, "\27%[%d+m", "") end
 -- @param fd file descriptor
 -- @param hdrtab table of headers
 -- @param tab table of row tables
-function M.write_table(fd, hdrtab, tab)
-   local cntpad = #(tostring(#tab))+2
+function M.write_table(fd, hdrtab, tab, opts)
+   local cntpad
+   opts = opts or {count=true}
+   if opts.count then cntpad = #(tostring(#tab))+2 else cntpad = 0 end
    -- write row table values and pad with value from corresponding pad tab
    local function clean(x) return M.strip_ansi(tostring(x)) end
    local function write_row(i, row, colpad)
@@ -180,7 +182,11 @@ function M.write_table(fd, hdrtab, tab)
 
    write_row(nil, hdrtab, maxlens)
 
-   for i,r in ipairs(tab) do write_row(i, r, maxlens) end
+   if opts.count then
+      for i,r in ipairs(tab) do write_row(i, r, maxlens) end
+   else
+      for _,r in ipairs(tab) do write_row(nil, r, maxlens) end
+   end
 end
 
 --- Convert a array of dictionaries into header and rows
