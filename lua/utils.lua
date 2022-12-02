@@ -153,6 +153,7 @@ function M.strip_ansi(str) return string.gsub(str, "\27%[%d+m", "") end
 -- @param fd file descriptor
 -- @param hdrtab table of headers
 -- @param tab table of row tables
+-- @param opts table of addtional options
 function M.write_table(fd, hdrtab, tab, opts)
    local cntpad
    opts = opts or {count=true}
@@ -193,12 +194,15 @@ end
 -- the output can be directly fed to write_table
 -- @param t a table of tables
 -- @return hdr and rows tables
-function M.tabulate(t)
-   local hdr, rows = {}, {}
+function M.tabulate(t, hdr)
+   local rows = {}
+   hdr = hdr or {}
 
    -- use first row to extract the hdr fields
-   for k,_ in pairs(t[1]) do hdr[#hdr+1] = k end
-   table.sort(hdr)
+   if #hdr == 0 then
+      for k,_ in pairs(t[1]) do hdr[#hdr+1] = k end
+      table.sort(hdr)
+   end
 
    for _,row in ipairs(t) do
       local newrow = {}
