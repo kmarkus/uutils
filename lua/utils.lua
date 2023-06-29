@@ -584,7 +584,7 @@ end
 -- @return status true if succesfull or false if erro
 -- @return 'exit' or 'signal'
 -- @return return value or signal that killed cmd
-local function M.exec(cmd)
+function M.exec(cmd)
    local f = io.popen(cmd)
    local res = string.gsub(f:read("*a"), '\n$', '')
    return res, f:close()
