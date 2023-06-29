@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="1.1.2"
+M.VERSION="1.1.3"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 
@@ -576,6 +576,18 @@ function M.expand(tpl, params, warn)
    end
 
    return tpl, unexp
+end
+
+--- Execute command
+-- @param cmd command to execute
+-- @return res output of command without newline
+-- @return status true if succesfull or false if erro
+-- @return 'exit' or 'signal'
+-- @return return value or signal that killed cmd
+local function M.exec(cmd)
+   local f = io.popen(cmd)
+   local res = string.gsub(f:read("*a"), '\n$', '')
+   return res, f:close()
 end
 
 local function pcall_bt(func, ...)
