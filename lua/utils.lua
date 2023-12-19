@@ -358,7 +358,7 @@ end
 function M.foldr(func, val, tab)
    if not tab then return val end
    for i,v in pairs(tab) do
-      val = func(val, v)
+      val = func(val, v, i)
    end
    return val
 end
