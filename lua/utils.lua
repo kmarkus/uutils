@@ -27,9 +27,51 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="1.1.3"
+M.VERSION="1.1.4"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
+local fmt = string.format
+
+-- Immutable (ro)
+-- strict (no-unitialized)
+
+-- Seal a table immutable
+-- @param t table to freeze
+-- @param immutable if true, make the table immutable
+-- @param strict if true, only allow access to existing keys
+-- @return a new immutable version of t
+-- the original table is not modified
+function M.seal(t, immutable, strict)
+   local function newindex_reject(_,k,_)
+      error(fmt("attempt to set key '%s' in immutable table", k))
+   end
+   local function newindex_strict(_,k,v)
+      if t[k] == nil then
+	 error(fmt("attempt to assign non-existing key '%s' in strict table", k))
+      end
+      rawset(t, k, v)
+   end
+   local function index_strict(_, k)
+      local r = t[k]
+      if r == nil then
+	 error(fmt("attempt to index non-existing key '%s' in strict table", k))
+      end
+      return r
+   end
+   local index, newindex
+   if strict then
+      index = index_strict
+      newindex = newindex_strict
+   end
+   if immutable then
+      newindex = newindex_reject
+   end
+   return setmetatable({}, {__index=index or t, __newindex=newindex})
+end
+
+function M.lock(t)
+   return M.seal(t, true, true)
+end
 
 function M.append(car, ...)
    assert(type(car) == 'table')
@@ -239,6 +281,7 @@ function M.stdout(...)
 end
 
 function M.split(str, pat)
+   assert(pat, "missing arg2: expected pattern")
    local t = {}  -- NOTE: use {n = 0} in Lua-5.0
    local fpat = "(.-)" .. pat
    local last_end = 1
