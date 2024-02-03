@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="1.1.4"
+M.VERSION="2.0.0"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 local fmt = string.format
@@ -601,21 +601,18 @@ end
 --- Expand parameters in string template.
 -- @param tpl string containing $NAME parameters.
 -- @param params table of NAME=value pairs for substitution.
--- @param warn optionally warn if there are nonexpanded parameters.
--- @return new string
--- @return number of unexpanded parameters
+-- @return expanded template string
+-- @return array of unexpanded parameters
 function M.expand(tpl, params, warn)
-   if warn==nil then warn=true end
-   local unexp = 0
+   local unexp = {}
 
-   -- expand
-   for name,val in pairs(params) do tpl=string.gsub(tpl, "%$"..name, val) end
+   for name,val in pairs(params) do
+      tpl=string.gsub(tpl, "%$"..name, val)
+   end
 
    -- check for unexpanded
-   local _,_,res= string.find(tpl, "%$([%a%d_]+)")
-   if res then
-      if warn then print("expand: warning, no param for variable $" .. res) end
-      unexp = unexp + 1
+   for name in tpl:gmatch("%$([%w_]+)") do
+      unexp[#unexp+1] = name
    end
 
    return tpl, unexp
