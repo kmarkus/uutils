@@ -476,7 +476,7 @@ end
 function M.table_cmp(t1, t2)
    local function __cmp(t1, t2)
       -- t1 _and_ t2 are not tables
-      if not (type(t1) == 'table' and type(t2) == 'table') then
+      if type(t1) ~= 'table' and type(t2) ~= 'table' then
 	 if t1 == t2 then return true
 	 else return false end
       elseif type(t1) == 'table' and type(t2) == 'table' then
