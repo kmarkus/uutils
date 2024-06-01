@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="2.0.0"
+M.VERSION="2.1.0"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 local fmt = string.format
@@ -513,6 +513,28 @@ function M.table_unique(t)
    return res
 end
 
+--- Merge two tables
+-- @param a first table
+-- @param b second table
+-- @return a new table with a and b merged
+-- in case of duplicate elements, the value of a is taken
+function M.table_merge(a, b)
+   assert(type(a) == 'table' and type(b) == 'table', "invalid arguments")
+
+   local r = M.deepcopy(b)
+
+   for k,v in pairs(a) do
+      if type(v)=='table' and type(r[k])=='table' then
+         r[k] = M.table_merge(v, r[k])
+      else
+         r[k] = v
+      end
+   end
+
+   return r
+end
+
+
 --- Convert arguments list into key-value pairs.
 -- The return table is indexable by parameters (i.e. ["-p"]) and the
 -- value is an array of zero to many option parameters.
@@ -621,7 +643,7 @@ end
 --- Execute command
 -- @param cmd command to execute
 -- @return res output of command without newline
--- @return status true if succesfull or false if erro
+-- @return status true if succesfull or false if error
 -- @return 'exit' or 'signal'
 -- @return return value or signal that killed cmd
 function M.exec(cmd)
