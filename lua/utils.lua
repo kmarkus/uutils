@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="2.1.0"
+M.VERSION="2.1.1"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 local fmt = string.format
@@ -474,27 +474,34 @@ end
 -- @param t2 value 2
 -- @return true if the same, false otherwise.
 function M.table_cmp(t1, t2)
-   local function __cmp(t1, t2)
+   local function __cmp(t1, t2, prefix)
       -- t1 _and_ t2 are not tables
       if type(t1) ~= 'table' and type(t2) ~= 'table' then
-	 if t1 == t2 then return true
-	 else return false end
+	 if t1 == t2 then
+	    return true
+	 else
+	    return false, fmt("%s values differ: %s != %s", prefix, t1, t2)
+	 end
       elseif type(t1) == 'table' and type(t2) == 'table' then
-	 if #t1 ~= #t2 then return false
+	 if #t1 ~= #t2 then
+	    return false, fmt("%s tables differ in number of elements: %s vs %s", prefix, #t1, #t2)
 	 else
 	    -- iterate over all keys and compare against k's keys
-	    for k,v in pairs(t1) do
-	       if not __cmp(t1[k], t2[k]) then
-		  return false
+	    for k,_ in pairs(t1) do
+	       local ret, msg = __cmp(t1[k], t2[k], prefix..'.'..k)
+	       if not ret then
+		  return ret, msg
 	       end
 	    end
 	    return true
 	 end
       else -- t1 and t2 are not of the same type
-	 return false
+	 return false, fmt("%s differ in type: %s vs %s", prefix, type(t1), type(t2))
       end
    end
-   return __cmp(t1,t2) and __cmp(t2,t1)
+   local r1, m1 = __cmp(t1, t2, "")
+   local r2, m2 = __cmp(t2, t1, "")
+   return r1 and r2, m1 or m2
 end
 
 function M.table_has(t, x)
