@@ -473,6 +473,7 @@ end
 -- @param t1 value 1
 -- @param t2 value 2
 -- @return true if the same, false otherwise.
+-- @return if false, a message describing the first difference found
 function M.table_cmp(t1, t2)
    local function __cmp(t1, t2, prefix)
       -- t1 _and_ t2 are not tables
