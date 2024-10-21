@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="2.1.1"
+M.VERSION="2.1.2"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 local fmt = string.format
@@ -454,7 +454,7 @@ function M.andt(...)
    local res = true
    local tab = {...}
    for _,t in ipairs(tab) do
-      res = res and M.foldr(AND, true, t)
+      res = res and M.foldr(M.AND, true, t)
    end
    return res
 end
