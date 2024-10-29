@@ -35,8 +35,8 @@ local fmt = string.format
 -- Immutable (ro)
 -- strict (no-unitialized)
 
--- Seal a table immutable
--- @param t table to freeze
+-- Seal a table to make it immutable
+-- @param t table to seal
 -- @param immutable if true, make the table immutable
 -- @param strict if true, only allow access to existing keys
 -- @return a new immutable version of t
