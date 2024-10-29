@@ -1,7 +1,7 @@
 --- Various sys/time.h like operations.
 --
 -- (C) 2010-2013 Markus Klotzbuecher <markus.klotzbuecher@mech.kuleuven.be>
--- (C) 2014-2020 Markus Klotzbuecher <mk@mkio.de>
+-- (C) 2014-2024 Markus Klotzbuecher <mk@mkio.de>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -10,7 +10,7 @@
 
 local M = {}
 
-M.VERSION = "1.0.0"
+M.VERSION = "1.0.1"
 
 -- constants
 local ns_per_s = 1000000000
@@ -100,7 +100,7 @@ end
 --- Convert a timespec to a string (in micro-seconds)
 --- for pretty printing purposes
 function M.ts2str(ts)
-   return ("%dus"):format(M.ts2us(ts))
+   return ("%sus"):format(M.ts2us(ts))
 end
 
 --- Convert timespec to us
@@ -116,7 +116,7 @@ end
 -- @param nsec
 -- @return time string
 function M.tostr_us(sec, nsec)
-   return ("%dus"):format(M.tous(sec, nsec))
+   return ("%sus"):format(M.tous(sec, nsec))
 end
 
 return M
