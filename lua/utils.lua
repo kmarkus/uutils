@@ -196,6 +196,7 @@ function M.strip_ansi(str) return string.gsub(str, "\27%[%d+m", "") end
 -- @param hdrtab table of headers
 -- @param tab table of row tables
 -- @param opts table of addtional options
+-- @param opts.count if true, print a count column. if numeric, treated as a offset to the 1-based count.
 function M.write_table(fd, hdrtab, tab, opts)
    local cntpad
    opts = opts or {count=true}
@@ -226,7 +227,9 @@ function M.write_table(fd, hdrtab, tab, opts)
    write_row(nil, hdrtab, maxlens)
 
    if opts.count then
-      for i,r in ipairs(tab) do write_row(i, r, maxlens) end
+      local off = 0
+      if type(opts.count) == 'number' then off = opts.count end
+      for i,r in ipairs(tab) do write_row(i+off, r, maxlens) end
    else
       for _,r in ipairs(tab) do write_row(nil, r, maxlens) end
    end
@@ -633,7 +636,7 @@ end
 -- @param params table of NAME=value pairs for substitution.
 -- @return expanded template string
 -- @return array of unexpanded parameters
-function M.expand(tpl, params, warn)
+function M.expand(tpl, params)
    local unexp = {}
 
    for name,val in pairs(params) do
