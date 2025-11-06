@@ -27,7 +27,7 @@ local M = {}
 
 -- increment major on API breaks
 -- increment minor on non breaking changes
-M.VERSION="2.1.2"
+M.VERSION="2.1.3"
 
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 local fmt = string.format
@@ -197,6 +197,7 @@ function M.strip_ansi(str) return string.gsub(str, "\27%[%d+m", "") end
 -- @param tab table of row tables
 -- @param opts table of addtional options
 -- @param opts.count if true, print a count column. if numeric, treated as a offset to the 1-based count.
+-- @param opts.nohdr if true, then don't print a header (hdrtab is still needed for width calculation)
 function M.write_table(fd, hdrtab, tab, opts)
    local cntpad
    opts = opts or {count=true}
@@ -224,7 +225,9 @@ function M.write_table(fd, hdrtab, tab, opts)
       end
    end
 
-   write_row(nil, hdrtab, maxlens)
+   if not opts.nohdr then
+      write_row(nil, hdrtab, maxlens)
+   end
 
    if opts.count then
       local off = 0
