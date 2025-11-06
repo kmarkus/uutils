@@ -178,7 +178,7 @@ end
 
 function TestPrettyTable:test_max_line_length_short()
    local t = {a = 1, b = 2, c = 3, d = 4, e = 5, f = 6, g = 7}
-   local serialized = pretty.tostr(t, 0, 30)
+   local serialized = pretty.tostr(t, 30, 0)
    -- Should use multiple lines due to short max_line_length
    lu.assertTrue(serialized:match("\n") ~= nil)
    local result = deserialize(serialized)
@@ -187,7 +187,7 @@ end
 
 function TestPrettyTable:test_max_line_length_long()
    local t = {a = 1, b = 2, c = 3}
-   local serialized = pretty.tostr(t, 0, 200)
+   local serialized = pretty.tostr(t, 200, 0)
    -- Should fit on one line with long max_line_length
    lu.assertTrue(serialized:match("\n") == nil)
    local result = deserialize(serialized)
@@ -236,7 +236,7 @@ end
 
 function TestPrettyTable:test_custom_key_sort()
    local t = {zebra = 1, apple = 2, mango = 3}
-   local serialized = pretty.tostr(t, 0, 80, function(a, b)
+   local serialized = pretty.tostr(t, 80, 0, 2, function(a, b)
       return tostring(a) > tostring(b)  -- reverse sort
    end)
    -- Just verify it deserializes correctly

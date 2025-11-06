@@ -1,28 +1,33 @@
 local M = {}
 
-local MAX_LINE_LENGTH = 100
+M.MAX_LINE_LENGTH = 100
+M.INDENT = 2
+M.INITIAL_INDENT = 0
 
 local fmt, rep = string.format, string.rep
 local insert, concat, sort = table.insert, table.concat, table.sort
-
 
 --- Pretty print Lua values in a human readable way
 -- Table will be printed in one line if possible and newlines only
 -- added if the resulting line is larger than max_line.
 -- @param val value to format
--- @param indent number of space to indent with
 -- @param max_line maximum line length.
+-- @param initial_indent initial indentation depth
+-- @param indent number of spaces per indentation level
 -- @param keysort optional function to sort keys
-function M.tostr(val, indent, max_line_length, keysort)
+-- @param parent_key_len length of parent key (for nested tables)
+function M.tostr(val, max_line_length, initial_indent, indent, keysort, parent_key_len)
    if type(val) ~= 'table' then return tostring(val) end
 
-   indent = indent or 0
-   max_line_length = max_line_length or MAX_LINE_LENGTH
+   indent = indent or M.INDENT
+   initial_indent = initial_indent or M.INITIAL_INDENT
+   max_line_length = max_line_length or M.MAX_LINE_LENGTH
    keysort = keysort or function(a, b) return tostring(a) < tostring(b) end
+   parent_key_len = parent_key_len or 0
 
-   local function serialize_value(v, ind)
+   local function serialize_value(v, ind, key_len)
       if type(v) == "table" then
-	 return M.tostr(v, ind, max_line_length, keysort)
+	 return M.tostr(v, max_line_length, ind, indent, keysort, key_len)
       elseif type(v) == "string" then
 	 return fmt("%q", v)
       else
@@ -48,7 +53,7 @@ function M.tostr(val, indent, max_line_length, keysort)
 
       -- add array elements first
       for i = 1, array_len do
-	 insert(parts, serialize_value(t[i], indent + 1))
+	 insert(parts, serialize_value(t[i], initial_indent + 1, 0))
       end
 
       -- add hash elements
@@ -59,19 +64,20 @@ function M.tostr(val, indent, max_line_length, keysort)
 	 elseif type(k) == "number" then
 	    key_str = fmt("[%d]", k)
 	 else
-	    key_str = fmt("[%s]", serialize_value(k, indent + 1))
+	    key_str = fmt("[%s]", serialize_value(k, initial_indent + 1, 0))
 	 end
-	 insert(parts, key_str .. "=" .. serialize_value(t[k], indent + 1))
+	 local kv_str = key_str .. "=" .. serialize_value(t[k], initial_indent + 1, #key_str + 1)
+	 insert(parts, kv_str)
       end
 
       return "{" .. concat(parts, ", ") .. "}"
    end
 
    local one_line = try_one_line(val)
-   local current_indent = rep("  ", indent)
+   local current_indent = rep(" ", indent * initial_indent)
 
-   -- if it fits on one line, use it
-   if #(current_indent .. one_line) <= max_line_length then
+   -- if it fits on one line, use it (accounting for parent key)
+   if #(current_indent .. one_line) + parent_key_len <= max_line_length then
       return one_line
    end
 
@@ -88,12 +94,12 @@ function M.tostr(val, indent, max_line_length, keysort)
 
    sort(keys, keysort)
 
-   local inner_indent = rep("  ", indent + 1)
+   local inner_indent = rep(" ", indent * (initial_indent + 1))
    insert(parts, "{")
 
    -- add array elements
    for i = 1, array_len do
-      local value = serialize_value(val[i], indent + 1)
+      local value = serialize_value(val[i], initial_indent + 1, 0)
       insert(parts, inner_indent .. value .. ",")
    end
 
@@ -105,9 +111,9 @@ function M.tostr(val, indent, max_line_length, keysort)
       elseif type(k) == "number" then
 	 key_str = fmt("[%d]", k)
       else
-	 key_str = fmt("[%s]", serialize_value(k, indent + 1))
+	 key_str = fmt("[%s]", serialize_value(k, initial_indent + 1, 0))
       end
-      local value = serialize_value(val[k], indent + 1)
+      local value = serialize_value(val[k], initial_indent + 1, #key_str + 1)
       insert(parts, inner_indent .. key_str .. "=" .. value .. ",")
    end
 
