@@ -1,3 +1,16 @@
+--- Pretty-printer for arbitrary Lua values.
+--
+-- Formats a value (typically a table) as valid, human readable Lua
+-- source. Tables are kept on a single line when they fit within
+-- `max_line_length`, and broken across indented lines otherwise.
+--
+-- @module prettytable
+-- @author Markus Klotzbuecher <mk@mkio.de>
+-- @license MIT
+-- @usage
+-- local pt = require("prettytable")
+-- print(pt.tostr({a=1, b={2, 3}}, 80))
+
 local M = {}
 
 M.MAX_LINE_LENGTH = 100
@@ -7,15 +20,16 @@ M.INITIAL_INDENT = 0
 local fmt, rep = string.format, string.rep
 local insert, concat, sort = table.insert, table.concat, table.sort
 
---- Pretty print Lua values in a human readable way
--- Table will be printed in one line if possible and newlines only
--- added if the resulting line is larger than max_line.
+--- Pretty print Lua values in a human readable way.
+-- A table is printed on one line if possible; newlines are only
+-- added when the resulting line would be longer than `max_line_length`.
 -- @param val value to format
--- @param max_line maximum line length.
--- @param initial_indent initial indentation depth
--- @param indent number of spaces per indentation level
+-- @param max_line_length maximum line length (default `M.MAX_LINE_LENGTH`)
+-- @param initial_indent initial indentation depth (default `M.INITIAL_INDENT`)
+-- @param indent number of spaces per indentation level (default `M.INDENT`)
 -- @param keysort optional function to sort keys
 -- @param parent_key_len length of parent key (for nested tables)
+-- @return a string of valid Lua source representing val
 function M.tostr(val, max_line_length, initial_indent, indent, keysort, parent_key_len)
    if type(val) ~= 'table' then return tostring(val) end
 

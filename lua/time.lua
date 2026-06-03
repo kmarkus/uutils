@@ -1,12 +1,16 @@
---- Various sys/time.h like operations.
+--- Various `sys/time.h` like operations.
 --
--- (C) 2010-2013 Markus Klotzbuecher <markus.klotzbuecher@mech.kuleuven.be>
--- (C) 2014-2024 Markus Klotzbuecher <mk@mkio.de>
+-- Functions take `struct timespec` like tables with `sec` and `nsec`
+-- fields as input and return two values `sec, nsec`.
 --
--- SPDX-License-Identifier: BSD-3-Clause
---
--- Take struct timespec tables with 'sec' and 'nsec' fields as input
--- and return two values sec, nsec
+-- @module time
+-- @author Markus Klotzbuecher <mk@mkio.de>
+-- @copyright 2010-2013 Markus Klotzbuecher (KU Leuven), 2014-2026 Markus Klotzbuecher
+-- @license BSD-3-Clause
+-- @usage
+-- local time = require("time")
+-- local sec, nsec = time.add({sec=1, nsec=5e8}, {sec=0, nsec=6e8})
+-- -- sec == 2, nsec == 100000000
 
 local M = {}
 
@@ -19,30 +23,32 @@ local us_per_s = 1000000
 M.ns_per_s = ns_per_s
 M.us_per_s = us_per_s
 
---- Normalize time.
+--- Normalize a (sec, nsec) pair.
+-- Carries any nsec over/underflow into sec and makes sec and nsec
+-- agree in sign, so that the represented value is always
+-- `sec*1e9 + nsec`. Unlike a naive implementation this also handles
+-- the `sec == 0` case and multi-second overflows.
 -- @param sec seconds
 -- @param nsec nanoseconds
+-- @return normalized sec
+-- @return normalized nsec
 function M.normalize(sec, nsec)
-   if sec > 0 and nsec > 0 then
-      while nsec >= ns_per_s do
-	 sec = sec + 1
-	 nsec = nsec - ns_per_s
-      end
-   elseif sec > 0 and nsec < 0 then
-      while nsec <= 0 do
-	 sec = sec - 1
-	 nsec = nsec + ns_per_s
-      end
+   -- carry any nsec over/underflow into sec
+   while nsec >= ns_per_s do
+      sec = sec + 1
+      nsec = nsec - ns_per_s
+   end
+   while nsec <= -ns_per_s do
+      sec = sec - 1
+      nsec = nsec + ns_per_s
+   end
+   -- make sec and nsec agree in sign
+   if sec > 0 and nsec < 0 then
+      sec = sec - 1
+      nsec = nsec + ns_per_s
    elseif sec < 0 and nsec > 0 then
-      while nsec > 0 do
-	 sec = sec + 1
-	 nsec = nsec - ns_per_s
-      end
-   elseif sec < 0 and nsec < 0 then
-      while nsec <= -ns_per_s do
-	 sec = sec - 1
-	 nsec = nsec + ns_per_s
-      end
+      sec = sec + 1
+      nsec = nsec - ns_per_s
    end
    return sec, nsec
 end
@@ -72,8 +78,10 @@ function M.div(t, d)
    return M.normalize(t.sec / d, t.nsec / d)
 end
 
---- Compare to timespecs
--- @result return 1 if t1 is greater than t2, -1 if t1 is less than t2 and 0 if t1 and t2 are equal
+--- Compare two timespecs.
+-- @param t1 timespec a
+-- @param t2 timespec b
+-- @return 1 if t1 > t2, -1 if t1 < t2, 0 if t1 == t2
 function M.cmp(t1, t2)
    if(t1.sec > t2.sec) then return 1
    elseif (t1.sec < t2.sec) then return -1
@@ -82,7 +90,7 @@ function M.cmp(t1, t2)
    else return 0 end
 end
 
--- Return absolute timespec.
+--- Return absolute timespec.
 -- @param ts timespec
 -- @return absolute sec
 -- @return absolute nsec
@@ -92,7 +100,7 @@ end
 
 --- Convert timespec to microseconds
 -- @param ts timespec
--- @result number of microseconds
+-- @return number of microseconds
 function M.ts2us(ts)
    return ts.sec * us_per_s + ts.nsec / 1000
 end

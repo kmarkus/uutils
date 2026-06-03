@@ -1,6 +1,16 @@
+--- Miscellaneous Lua utilities.
 --
--- Useful code snips
--- some own ones, some collected from the lua wiki
+-- A grab bag of string handling, table/functional helpers, formatting
+-- and small conveniences. Some written here, some collected from the
+-- Lua wiki (see individual function comments for sources).
+--
+-- @module utils
+-- @author Markus Klotzbuecher <mk@mkio.de>
+-- @license MIT
+-- @usage
+-- local utils = require("utils")
+-- print(utils.tab2str({1, 2, foo="bar"}))   --> {1,2,foo="bar"}
+
 --
 -- Permission is hereby granted, free of charge, to any person obtaining
 -- a copy of this software and associated documentation files (the
@@ -32,15 +42,27 @@ M.VERSION="2.1.3"
 local pack = table.pack or function(...) return { n = select('#', ...), ... } end
 local fmt = string.format
 
+-- Load a chunk in a given environment, portably across Lua 5.1-5.5.
+-- On 5.1 there is no env argument to load, so fall back to setfenv.
+-- @return chunk function or nil, errmsg
+local function load_env(code, env)
+   if setfenv then -- Lua 5.1 / LuaJIT
+      local f, err = loadstring(code)
+      if not f then return nil, err end
+      return setfenv(f, env)
+   end
+   return load(code, nil, 't', env)
+end
+
 -- Immutable (ro)
 -- strict (no-unitialized)
 
--- Seal a table to make it immutable
+--- Seal a table to make it immutable and/or strict.
+-- The original table is not modified; a new proxy table is returned.
 -- @param t table to seal
--- @param immutable if true, make the table immutable
--- @param strict if true, only allow access to existing keys
--- @return a new immutable version of t
--- the original table is not modified
+-- @param immutable if true, reject all writes
+-- @param strict if true, only allow access/assignment to existing keys
+-- @return a new sealed version of t
 function M.seal(t, immutable, strict)
    local function newindex_reject(_,k,_)
       error(fmt("attempt to set key '%s' in immutable table", k))
@@ -241,6 +263,7 @@ end
 --- Convert a array of dictionaries into header and rows
 -- the output can be directly fed to write_table
 -- @param t a table of tables
+-- @param hdr optional array of header keys (order/selection of columns)
 -- @return hdr and rows tables
 function M.tabulate(t, hdr)
    local rows = {}
@@ -331,10 +354,10 @@ end
 
 function M.cons(car, cdr)
    local new_array = {car}
-  for _,v in cdr do
-     table.insert(new_array, v)
-  end
-  return new_array
+   for _,v in ipairs(cdr) do
+      table.insert(new_array, v)
+   end
+   return new_array
 end
 
 function M.flatten(t)
@@ -415,7 +438,7 @@ end
 --- Fill a table with num val's
 -- @param val value
 -- @param num number
--- @param table of num val's
+-- @return table of num (deep) copies of val
 function M.fill(val, num)
    local res = {}
    for i=1,num do res[i] = M.deepcopy(val) end
@@ -466,7 +489,8 @@ function M.andt(...)
 end
 
 function M.eval(str)
-   local l = load or loadstring -- 5.1 backward compat
+   -- on Lua 5.1 prefer loadstring (load there expects a function, not a string)
+   local l = loadstring or load
    return assert(l(str))()
 end
 
@@ -475,7 +499,7 @@ function M.unrequire(m)
    _G[m] = nil
 end
 
--- Compare two values (potentially recursively).
+--- Compare two values (potentially recursively).
 -- @param t1 value 1
 -- @param t2 value 2
 -- @return true if the same, false otherwise.
@@ -487,7 +511,8 @@ function M.table_cmp(t1, t2)
 	 if t1 == t2 then
 	    return true
 	 else
-	    return false, fmt("%s values differ: %s != %s", prefix, t1, t2)
+	    -- tostring() the values: string.format("%s", nil) errors on Lua 5.1
+	    return false, fmt("%s values differ: %s != %s", prefix, tostring(t1), tostring(t2))
 	 end
       elseif type(t1) == 'table' and type(t2) == 'table' then
 	 if #t1 ~= #t2 then
@@ -552,7 +577,7 @@ end
 --- Convert arguments list into key-value pairs.
 -- The return table is indexable by parameters (i.e. ["-p"]) and the
 -- value is an array of zero to many option parameters.
--- @param standard Lua argument table
+-- @param args standard Lua argument table
 -- @return key-value table
 function M.proc_args(args)
    local function is_opt(s) return string.sub(s, 1, 1) == '-' end
@@ -576,9 +601,9 @@ end
 -- depends on the where parameter, that can take the values of
 -- 'before' or 'after'.
 -- If oldfun is nil, newfun is returned.
--- @param where string <code>before</code>' or <code>after</code>
--- @param oldfun (can be nil)
--- @param newfunc
+-- @param where string <code>before</code> or <code>after</code>
+-- @param oldfun the existing function (can be nil)
+-- @param newfun the new function to combine with oldfun
 function M.advise(where, oldfun, newfun)
    assert(where == 'before' or where == 'after',
 	  "advise: Invalid value " .. tostring(where) .. " for where")
@@ -615,15 +640,18 @@ function M.memoize (f)
 	  end
 end
 
---- call thunk every s+ns seconds.
+--- Generate a function that calls thunk every s+ns seconds.
+-- @param s seconds
+-- @param ns nanoseconds
+-- @param thunk function to call when the interval has elapsed
+-- @param gettime function returning the current time as sec, nsec
+-- @return a function that, when called, invokes thunk if due
 function M.gen_do_every(s, ns, thunk, gettime)
+   local time = require("time")
    local next = { sec=0, nsec=0 }
    local cur = { sec=0, nsec=0 }
    local inc = { sec=s, nsec=ns }
 
-   if not type(time) == 'table' then
-      error ("gen_do_every requires the time module")
-   end
    return function()
 	     cur.sec, cur.nsec = gettime()
 
@@ -643,7 +671,9 @@ function M.expand(tpl, params)
    local unexp = {}
 
    for name,val in pairs(params) do
-      tpl=string.gsub(tpl, "%$"..name, val)
+      -- use a function replacement so that '%' in val is not treated
+      -- as a special character in the replacement string
+      tpl=string.gsub(tpl, "%$"..name, function() return tostring(val) end)
    end
 
    -- check for unexpanded
@@ -672,12 +702,12 @@ end
 
 --- Evaluate a chunk of code in a constrained environment.
 -- @param unsafe_code code string
--- @param optional environment table.
+-- @param env optional environment table.
 -- @return true or false depending on success
 -- @return function or error message
 function M.eval_sandbox(unsafe_code, env)
    env = env or {}
-   local unsafe_fun, msg = load(unsafe_code, nil, 't', env)
+   local unsafe_fun, msg = load_env(unsafe_code, env)
    if not unsafe_fun then return false, msg end
    return pcall_bt(unsafe_fun)
 end
@@ -735,7 +765,7 @@ end
 
 --- Convert a string to a hex representation of a string.
 -- @param str string to convert
--- @param space space between values (default: "")
+-- @param spacer separator between values (default: "")
 -- @return hex string
 function M.str_to_hexstr(str,spacer)
    return string.lower(
@@ -746,14 +776,14 @@ function M.str_to_hexstr(str,spacer)
 end
 
 --- Return the maximum of two numbers
--- @param x1
--- @param x2
+-- @param x1 first number
+-- @param x2 second number
 -- @return the maximum
 function M.max(x1, x2) if x1>x2 then return x1; else return x2; end end
 
 --- Return the minimum of two numbers
--- @param x1
--- @param x2
+-- @param x1 first number
+-- @param x2 second number
 -- @return the minimum
 function M.min(x1, x2) if x1>x2 then return x2; else return x1; end end
 

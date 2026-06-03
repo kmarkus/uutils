@@ -1,0 +1,83 @@
+* =uutils= by example
+
+** =seal(table, immutable, strict)=
+
+#+begin_src lua :results output
+  u=require("utils")
+  t=u.seal({a=1,b="foo"}, true, true) -- equivalent to utils.lock
+  print(t.b)                          -- -> "foo"
+  t.b="bar"
+#+end_src
+
+#+RESULTS:
+: foo
+
+#+begin_src fundamental
+lua: /usr/share/lua/5.4/utils.lua:46: attempt to set key 'b' in immutable table
+stack traceback:
+        [C]: in function 'error'
+        /usr/share/lua/5.4/utils.lua:46: in metamethod 'newindex'
+        stdin:4: in main chunk
+        [C]: in ?
+[ Babel evaluation exited with code 0 ]
+#+end_src
+
+
+
+** =expand(tpl, params)=
+
+Simple template expansion.
+expand the given template with $KEY values from the =params= table.
+returns first the expaneded template and secondly an array of unexpanded parameters
+
+#+begin_src lua :results output
+  u=require("utils")
+  local tmpl = [[
+  Hello $WHO
+
+  $HOW day today!
+  ]]
+  local exp, unexp = u.expand(tmpl, { WHO="World", HOW="Great" })
+
+  assert(#unexp == 0)
+  print(exp)
+#+end_src
+
+#+RESULTS:
+: Hello World
+: 
+: Great day today!
+: 
+
+
+** =preproc(str, env, verbose)=
+
+this is a more powerful template supporting mixing Lua and strings:
+
+#+begin_src lua :results output
+  u=require("utils")
+
+  local res, str = u.preproc(
+[[     
+CSV Template for preset $(PRESET)
+@ for i,v in ipairs(rows) do
+$(i)$(SEP) $(v)$(SEP)
+@ end
+the end;
+]], {ipairs=ipairs, PRESET="mypreset", SEP=';', rows={'a', 'b', 'c' }} )
+
+  print(str)
+#+end_src
+
+#+RESULTS:
+:      
+: CSV Template for preset mypreset
+: 1; a;
+: 2; b;
+: 3; c;
+: the end;
+: 
+
+
+
+

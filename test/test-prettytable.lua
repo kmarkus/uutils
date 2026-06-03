@@ -3,9 +3,10 @@ local pretty = require('prettytable')
 
 TestPrettyTable = {}
 
--- Helper function to load serialized table back
+-- Helper function to load serialized table back (load is loadstring on 5.1)
+local lua_load = loadstring or load -- on 5.1 prefer loadstring (load takes a function)
 local function deserialize(str)
-   local func, err = load("return " .. str)
+   local func, err = lua_load("return " .. str)
    if not func then
       error("Failed to deserialize: " .. err)
    end
@@ -244,5 +245,25 @@ function TestPrettyTable:test_custom_key_sort()
    lu.assertEquals(result, t)
 end
 
--- Run tests
-os.exit(lu.LuaUnit.run())
+-- Generative round-trip test: tables of n keys with increasingly long
+-- string values, formatted at various maximum line lengths, must always
+-- deserialize back to the original (folded in from the old pretty.lua demo).
+function TestPrettyTable:test_generative_roundtrip()
+   local function gen(n)
+      local t = {}
+      for i = 1, n do
+         t[string.format("key_%03d", i)] = string.rep("*", i)
+      end
+      return t
+   end
+
+   for _, n in ipairs({1, 5, 20, 50}) do
+      for _, max_len in ipairs({10, 40, 100, 1000}) do
+         local t = gen(n)
+         local serialized = pretty.tostr(t, max_len)
+         lu.assertEquals(deserialize(serialized), t)
+      end
+   end
+end
+
+return TestPrettyTable
