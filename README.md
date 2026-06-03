@@ -67,7 +67,57 @@ print(pt.tostr({a = 1, b = {2, 3}, name = "demo"}, 80))
 --> {a=1, b={2, 3}, name="demo"}
 ```
 
-See `examples.org` for more worked examples (`seal`, `expand`, `preproc`).
+### More examples
+
+**`seal(t, immutable, strict)`** — return an immutable and/or strict
+view of a table (the original is untouched). `lock(t)` is shorthand for
+`seal(t, true, true)`:
+
+```lua
+local utils = require("utils")
+local t = utils.seal({a = 1, b = "foo"}, true, true)
+print(t.b)       --> foo
+t.b = "bar"      --> error: attempt to set key 'b' in immutable table
+```
+
+**`expand(tpl, params)`** — simple `$NAME` template expansion. Returns
+the expanded string and an array of any parameters that were not
+substituted:
+
+```lua
+local tmpl = [[
+Hello $WHO
+
+$HOW day today!
+]]
+local exp, unexp = utils.expand(tmpl, {WHO = "World", HOW = "Great"})
+assert(#unexp == 0)
+print(exp)
+--> Hello World
+-->
+--> Great day today!
+```
+
+**`preproc(str, env, verbose)`** — a more powerful template engine that
+mixes Lua and text: lines starting with `@` are executed as Lua, and
+`$(...)` expressions are evaluated and inlined:
+
+```lua
+local res, str = utils.preproc([[
+CSV Template for preset $(PRESET)
+@ for i,v in ipairs(rows) do
+$(i)$(SEP) $(v)$(SEP)
+@ end
+the end;
+]], {ipairs = ipairs, PRESET = "mypreset", SEP = ";", rows = {"a", "b", "c"}})
+
+print(str)
+--> CSV Template for preset mypreset
+--> 1; a;
+--> 2; b;
+--> 3; c;
+--> the end;
+```
 
 ## Tests
 
